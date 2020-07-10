@@ -57,68 +57,6 @@ This means you do not have python3 installed and I encourage you to enroll in th
 
 Alternatively you can download and install from the [Python.org site](https://www.python.org/downloads/).  Select your operating system and follow the instructions.
 
-## Verify OpenCV 4.x is Installed
-
-The installation of OpenCV is covered in the course, "OpenCV, Python, and DroneBlocks for Tello Camera Control".  If you do not have OpenCV installed please refer to that course for instructions on how to install OpenCV
-
-To verify that OpenCV is installed, open a terminal window or cmd window.
-
-Type the following:
-
-`python3`
-
-This will open a Python interpreter and it will look something like the following:
-```shell script
-Python 3.7.7 (default, Mar 10 2020, 15:43:03)
-[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>>
-```
-At the '>>>' type the following:
-
-`import cv2` and press return
-
-If you do not have OpenCV installed you should see something like the following:
-
-```shell script
->>> import cv2
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-ModuleNotFoundError: No module named 'cv2'
-```
-if you do not see an error message, type the following:
-
-`cv2.__version__` and press return.
-
-You should see something like the following:
-```shell script
-Python 3.7.7 (default, Mar 10 2020, 15:43:03)
-[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>> import cv2
->>> cv2.__version__
-'4.2.0'
->>>
-```
-If you do not see the version string such as, '4.2.0', or '4.3.0' then please see the course for how to install OpenCV.
-
-To verify that the OpenCV contributor packages were installed type the following:
-
-`import cv2.aruco` and press return
-
-You should see no errors.
-
-```shell script
-Python 3.7.7 (default, Mar 10 2020, 15:43:03)
-[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>> import cv2
->>> cv2.__version__
-'4.2.0'
->>> import cv2.aruco
->>>
-```
-
 ## Creating a Python Virtual Environment
 
 What is a Python Virtual Environment?
@@ -178,6 +116,78 @@ If you would like to create a new terminal window, and activate the `tello_setup
 cd tello_projects/tello_setup
 source .venv/bin/activate
 ```
+## Install OpenCV
+
+The installation of OpenCV is covered in the course, "OpenCV, Python, and DroneBlocks for Tello Camera Control". If you do not have OpenCV installed please refer to that course for instructions on how to install OpenCV
+
+In your terminal/cmd window type the following:
+
+```shell script
+pip install opencv-python
+pip install opencv-contrib-python
+
+```
+
+### Verify OpenCV 4.x is Installed
+
+To verify that OpenCV is installed, open a terminal window or cmd window.
+
+Type the following:
+
+`python3`
+
+This will open a Python interpreter and it will look something like the following:
+```shell script
+Python 3.7.7 (default, Mar 10 2020, 15:43:03)
+[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+```
+At the '>>>' type the following:
+
+`import cv2` and press return
+
+If you do not have OpenCV installed you should see something like the following:
+
+```shell script
+>>> import cv2
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'cv2'
+```
+if you do not see an error message, type the following:
+
+`cv2.__version__` and press return.
+
+You should see something like the following:
+```shell script
+Python 3.7.7 (default, Mar 10 2020, 15:43:03)
+[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> cv2.__version__
+'4.2.0'
+>>>
+```
+If you do not see the version string such as, '4.2.0', or '4.3.0' then please see the course for how to install OpenCV.
+
+To verify that the OpenCV contributor packages were installed type the following:
+
+`import cv2.aruco` and press return
+
+You should see no errors.
+
+```shell script
+Python 3.7.7 (default, Mar 10 2020, 15:43:03)
+[Clang 11.0.0 (clang-1100.0.33.17)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import cv2
+>>> cv2.__version__
+'4.2.0'
+>>> import cv2.aruco
+>>>
+```
+
 
 ## Install the necessary Python packages
 
