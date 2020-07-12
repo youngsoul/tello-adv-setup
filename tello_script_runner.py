@@ -237,7 +237,7 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
             init_method = getattr(handler_module, 'init')
             handler_method = getattr(handler_module, 'handler')
 
-            init_method(tello, fly=fly)
+            init_method(tello, fly_flag=fly)
 
         frame_read = None
         if tello and (show_video_queue or video_writer_queue):
