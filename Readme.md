@@ -381,6 +381,14 @@ python tello_camera_fly.py
 
 After a few seconds you should see a window open up showing the video stream.  Select the window to make it the active window and you can now issue keyboard commands.
 
+## DroneBlocks Tello Script Runner
+
+In this last section we are going to cover a script that we will use in many of the advanced Tello programming courses.
+
+The script is, `tello_script_runner.py'
+
+
+
 ## Conclusion
 
 Congratulations!  You have successfully completed this tutorial and verified that your development environment is ready to build advanced Tello programming with Python.

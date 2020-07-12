@@ -89,7 +89,7 @@ def _process_keyboard_commands(tello, fly):
         tello_image = cv2.imread("./media/tello_drone_image2.png")
         tello_image = imutils.resize(tello_image, width=IMAGE_WIDTH)
 
-    if time.time() - battery_update_timestamp > 10:
+    if tello and time.time() - battery_update_timestamp > 10:
         battery_update_timestamp = time.time()
         battery_left = tello.get_battery()
 
@@ -203,8 +203,7 @@ def _get_video_frame(frame_read, vid_sim):
     return None
 
 
-def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue, fly=False,
-                             max_speed_limit=40, tello_video_sim=False):
+def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue, fly=False, tello_video_sim=False):
     """
 
     :param exit_event: Multiprocessing Event.  When set, this event indicates that the process should stop.
@@ -227,7 +226,7 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
     handler_method = None
 
     try:
-        if not tello_video_sim:
+        if fly or ( not tello_video_sim and (show_video_queue or video_writer_queue)):
             tello = Tello()
             rtn = tello.connect()
             LOGGER.debug(f"Connect Return: {rtn}")
@@ -238,7 +237,7 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
             init_method = getattr(handler_module, 'init')
             handler_method = getattr(handler_module, 'handler')
 
-            init_method(tello, max_speed=max_speed_limit, fly=fly)
+            init_method(tello, fly_flag=fly)
 
         frame_read = None
         if tello and (show_video_queue or video_writer_queue):
@@ -298,7 +297,7 @@ def show_video(frame_queue):
         try:
             frame = frame_queue.get()
             # display the frame to the screen
-            cv2.imshow("Drone Face Tracking", frame)
+            cv2.imshow("Tello Video", frame)
             cv2.waitKey(1)
         except Exception as exc:
             LOGGER.error(exc)
@@ -335,24 +334,21 @@ if __name__ == '__main__':
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--display-video", action='store_true', help="Display Drone video using OpenCV.  Default: 1")
-    ap.add_argument("--save-video", action='store_true', help="Save video as MP4 file.  Default: 1")
+    ap.add_argument("--save-video", action='store_true', help="Save video as MP4 file.  Default: False")
     ap.add_argument("--handler-file", type=str, required=False, default="",
                     help="Name of the python file with an init and handler method.  Do not include the .py extension and it has to be in the same folder as this main driver")
-    ap.add_argument("--max-speed", type=int, required=False, default=40, help="0-100 value")
     output_group = ap.add_mutually_exclusive_group()
-    output_group.add_argument('-q', '--quiet', action='store_true', help='Be quiet')
     output_group.add_argument('-v', '--verbose', action='store_true', help='Be loud')
     output_group.add_argument('-i', '--info', action='store_true', help='Show only important information')
     fly_sim_group = ap.add_mutually_exclusive_group()
     fly_sim_group.add_argument("--fly", action='store_true',
-                               help="Flag to control whether the drone should take flight. You also need to 'track-face' for the drone to follow the face.  Default: False")
+                               help="Flag to control whether the drone should take flight.  Default: False")
     fly_sim_group.add_argument("--tello-video-sim", action='store_true',
                                help="Flag to control whether to use the computer webcam as a simulated Tello video feed. Default: False")
 
     args = vars(ap.parse_args())
 
-    if args["quiet"]:
-        LOGGER.setLevel(logging.CRITICAL)
+    LOGGER.setLevel(logging.CRITICAL)
     if args["verbose"]:
         LOGGER.setLevel(logging.NOTSET)
     if args["info"]:
@@ -364,9 +360,12 @@ if __name__ == '__main__':
     fly = args['fly']
     LOGGER.debug(f"Fly: {fly}")
     display_video = args['display_video']
-    max_speed = args['max_speed']
     handler_file = args['handler_file']
     tello_video_sim = args['tello_video_sim']
+
+    # if the user selected tello_video_sim, force the display video flag
+    if tello_video_sim:
+        display_video = True
 
     display_video_queue = None
     if display_video:
@@ -378,7 +377,7 @@ if __name__ == '__main__':
 
     with Manager() as manager:
         p1 = Process(target=process_tello_video_feed,
-                     args=(handler_file, display_video_queue, save_video_queue, fly, max_speed, tello_video_sim))
+                     args=(handler_file, display_video_queue, save_video_queue, fly, tello_video_sim))
 
         if display_video:
             p2 = Process(target=show_video, args=(display_video_queue,))

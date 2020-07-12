@@ -1,0 +1,4 @@
+
+UP_DOWN_HEIGHT = 30
+
+TIME_BETWEEN = 2 # seconds

@@ -30,7 +30,7 @@ while True:
     img = frame_reader.frame
 
     # Have OpenCV display the Video Frame
-    cv2.imshow("drone", img)
+    cv2.imshow("Tello View", img)
 
     # If ESC is pressed then stop
     key = cv2.waitKey(1) & 0xff
