@@ -53,7 +53,7 @@ If you received a message like:
 
 `command not found`
 
-This means you do not have python3 installed and I encourage you to enroll in the  "OpenCV, Python, and DroneBlocks for Tello Camera Control".
+This means you do not have python3 installed and I encourage you to enroll in the [OpenCV, Python, and DroneBlocks for Tello Camera Control](https://learn.droneblocks.io/p/opencv-python-and-droneblocks-for-tello-camera-control) course.
 
 Alternatively you can download and install from the [Python.org site](https://www.python.org/downloads/).  Select your operating system and follow the instructions.
 
@@ -80,7 +80,7 @@ Let us see how to do that.
 * Create a directory called, `tello_setup`
 >       `mkdir tello_setup`
 
-* Change director into `tello_setup`
+* Change directory into `tello_setup`
 >       `cd tello_setup`
 
 Once we have created these directories, and we are in the `tello_setup` directory we are now ready to create a local Python environment for the `tello_setup` project.
