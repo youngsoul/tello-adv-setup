@@ -106,11 +106,11 @@ Windows:
 
 At this point you now have a Python virtual environment for the `tello_setup` project that is not shared with any other project, and we have activated it in the current terminal window.
 
-Keep in mind that the environment is only activate in the current terminal window.
+Keep in mind that the environment is only active in the current terminal window.
 
 If you would like to create a new terminal window, and activate the `tello_setup` virtual environment you would perform the following:
 
-* Open and new terminal/cmd window
+* Open a new terminal/cmd window
 
 ```shell script
 cd tello_projects/tello_setup
@@ -118,7 +118,7 @@ source .venv/bin/activate
 ```
 ## Install OpenCV
 
-The installation of OpenCV is covered in the course, "OpenCV, Python, and DroneBlocks for Tello Camera Control". If you do not have OpenCV installed please refer to that course for instructions on how to install OpenCV
+The installation of OpenCV is covered in the course, [OpenCV, Python, and DroneBlocks for Tello Camera Control](https://learn.droneblocks.io/p/opencv-python-and-droneblocks-for-tello-camera-control) . If you do not have OpenCV installed please refer to that course for instructions on how to install OpenCV
 
 In your terminal/cmd window type the following:
 
