@@ -57,7 +57,7 @@ This means you do not have python3 installed and I encourage you to enroll in th
 
 Alternatively you can download and install from the [Python.org site](https://www.python.org/downloads/).  Select your operating system and follow the instructions.
 
-## Creating a Python Virtual Environment
+## Github Code and Creating a Python Virtual Environment
 
 What is a Python Virtual Environment?
 
@@ -77,20 +77,24 @@ Let us see how to do that.
 * Change directory into `tello_projects`
 >       `cd tello_projects`
 
-* Create a directory called, `tello_setup`
->       `mkdir tello_setup`
+Once we have created tello_projects, and we are in the `tello_projects` directory we are now ready get the code from Github.
 
-* Change directory into `tello_setup`
->       `cd tello_setup`
+In a browser go to the url:
 
-Once we have created these directories, and we are in the `tello_setup` directory we are now ready to create a local Python environment for the `tello_setup` project.
+```text
+https://www.github.com/dbaldwin/tello-adv-setup
+```
+
+From that page your there will be a `CODE` button where you can either download a zip file or get the `git clone` url.
+
+Make sure you clone or unzip the file into the `tello_projects` directory.
 
 There are a number of ways to create a Python virtual environment.  I am going to show you one way to do this but if you research other ways it is perfectly acceptable for you to use any method you are comfortable with.
 
 In the terminal/cmd window continue with the following instructions.
 
 * Type the following command:
->       `python3 -m venv .venv`
+>       `python3 -m venv venv`
 
 This will instruct Python3 to create a virtual, Python3 environment that looks just like the global version, and put this in a new directory called `.venv`
 
@@ -215,7 +219,7 @@ The Github repository can be found here: https://github.com/damiafuentes/DJITell
 
 To install the DJITelloPy API package, in the terminal window type the following:
 
-`pip install https://github.com/damiafuentes/DJITelloPy/archive/master.zip`
+`pip install djitellopy`
 
 When the pip command completes let us check that the install worked.
 

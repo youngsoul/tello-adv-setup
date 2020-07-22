@@ -579,4 +579,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-*.mp4f
+video_*.mp4
