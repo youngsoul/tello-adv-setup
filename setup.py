@@ -10,8 +10,8 @@ setup(
     author_email='',
     description='Tello Advanced Project Development Setup ',
     install_requires = [
-        'opencv-python==4.2.0.34',
-        'opencv-contrib-python==4.2.0.34',
+        'opencv-python==4.3.0.36',
+        'opencv-contrib-python==4.3.0.36',
         'jupyter==1.0.0',
         'djitellopy==1.5'
     ]
