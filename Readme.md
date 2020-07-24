@@ -137,7 +137,7 @@ To verify that OpenCV is installed, open a terminal window or cmd window.
 
 Type the following:
 
-`python3`
+`python`
 
 This will open a Python interpreter and it will look something like the following:
 ```shell script
