@@ -10,10 +10,10 @@ setup(
     author_email='',
     description='Tello Advanced Project Development Setup ',
     install_requires = [
+        # pip install https://github.com/damiafuentes/DJITelloPy/archive/master.zip
         'opencv-python==4.3.0.36',
         'opencv-contrib-python==4.3.0.36',
-        'jupyter==1.0.0',
-        'djitellopy==1.5'
+        'jupyter==1.0.0'
     ]
 
 )

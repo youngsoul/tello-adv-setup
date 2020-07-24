@@ -8,8 +8,6 @@ This tutorial will make sure the following is ready to go:
 
 > Python 3.6 or greater is installed on your machine
 
-> Verify that OpenCV 4.x is installed
-
 > Create a Python virtual environment
 
 > Activate a Python virtual environment
@@ -18,6 +16,7 @@ This tutorial will make sure the following is ready to go:
 > * Jupyter
 > * PyTello
 > * imutils
+> * OpenCV
 
 > Start Jupyter Notebook
 
@@ -219,7 +218,7 @@ The Github repository can be found here: https://github.com/damiafuentes/DJITell
 
 To install the DJITelloPy API package, in the terminal window type the following:
 
-`pip install djitellopy`
+`pip install https://github.com/damiafuentes/DJITelloPy/archive/master.zip`
 
 When the pip command completes let us check that the install worked.
 
