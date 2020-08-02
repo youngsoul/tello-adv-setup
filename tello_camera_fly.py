@@ -59,5 +59,5 @@ tello.land()
 
 tello.streamoff()
 
-cv2.destroyWindow('drone')
+cv2.destroyWindow('Tello View')
 cv2.destroyAllWindows()

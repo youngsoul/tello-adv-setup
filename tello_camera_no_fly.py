@@ -37,6 +37,6 @@ while True:
     if key == 27: # ESC
         break
 
-cv2.destroyWindow('drone')
+cv2.destroyWindow('Tello View')
 cv2.destroyAllWindows()
 tello.streamoff()
