@@ -23,8 +23,8 @@ tello.streamon()
 frame_reader = tello.get_frame_read()
 
 while True:
-    # In reality you want to display frames in a seperate thread. Otherwise
-    #  they will freeze while the drone moves.
+    # In reality you want to display frames in a separate thread. Otherwise
+    # they will freeze while the drone moves.
 
     # Read a video frame from Tello
     img = frame_reader.frame
@@ -40,3 +40,24 @@ while True:
 cv2.destroyWindow('Tello View')
 cv2.destroyAllWindows()
 tello.streamoff()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

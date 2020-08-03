@@ -2,12 +2,17 @@ from sample_user_config import UP_DOWN_HEIGHT, TIME_BETWEEN
 import time
 import logging
 
+"""
+Sample user supplied script.  This script will cause the Tello drone to go up and down
+and then wait for the TIME_BETWEEN seconds to expire before issuing the next command.
+
+"""
 LOGGER = logging.getLogger()
 
 
 def init(tello, fly_flag=False):
     # nothing to initialize
-    pass
+    LOGGER.info("Calling init function of sample_user_script....")
 
 last_command_timestamp = 0
 last_command = 'down'

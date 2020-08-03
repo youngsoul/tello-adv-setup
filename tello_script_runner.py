@@ -348,7 +348,7 @@ if __name__ == '__main__':
 
     args = vars(ap.parse_args())
 
-    LOGGER.setLevel(logging.CRITICAL)
+    LOGGER.setLevel(logging.ERROR)
     if args["verbose"]:
         LOGGER.setLevel(logging.NOTSET)
     if args["info"]:
