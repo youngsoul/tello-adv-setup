@@ -254,9 +254,12 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
 
             if frame is None:
                 # print("Failed to read video frame")
-                if fly:
-                    tello.send_rc_control(0, 0, 0, 0)
-                time.sleep(0.5)
+                if handler_method and processing_flag == 1:
+                    handler_method(tello, frame, fly)
+                else:
+                    # stop let keyboard commands take over
+                    if fly:
+                        tello.send_rc_control(0, 0, 0, 0)
                 processing_flag = _exception_save_process_keyboard_commands(tello, fly)
                 continue
 
