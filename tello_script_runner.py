@@ -335,7 +335,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("--display-video", action='store_true', help="Display Drone video using OpenCV.  Default: 1")
     ap.add_argument("--save-video", action='store_true', help="Save video as MP4 file.  Default: False")
-    ap.add_argument("--handler-file", type=str, required=False, default="",
+    ap.add_argument("--handler", type=str, required=False, default="",
                     help="Name of the python file with an init and handler method.  Do not include the .py extension and it has to be in the same folder as this main driver")
     output_group = ap.add_mutually_exclusive_group()
     output_group.add_argument('-v', '--verbose', action='store_true', help='Be loud')
@@ -360,7 +360,7 @@ if __name__ == '__main__':
     fly = args['fly']
     LOGGER.debug(f"Fly: {fly}")
     display_video = args['display_video']
-    handler_file = args['handler_file']
+    handler_file = args['handler']
     tello_video_sim = args['tello_video_sim']
 
     # if the user selected tello_video_sim, force the display video flag

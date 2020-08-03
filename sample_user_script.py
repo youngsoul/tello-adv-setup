@@ -1,4 +1,3 @@
-from sample_user_config import UP_DOWN_HEIGHT, TIME_BETWEEN
 import time
 import logging
 
@@ -9,13 +8,22 @@ and then wait for the TIME_BETWEEN seconds to expire before issuing the next com
 """
 LOGGER = logging.getLogger()
 
+# User Configuration
+
+UP_DOWN_HEIGHT = 30
+
+# Time in seconds
+TIME_BETWEEN = 3
+
 
 def init(tello, fly_flag=False):
     # nothing to initialize
     LOGGER.info("Calling init function of sample_user_script....")
 
+
 last_command_timestamp = 0
 last_command = 'down'
+
 
 def handler(tello, frame, fly_flag=False):
     global last_command_timestamp, last_command
