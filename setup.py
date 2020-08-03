@@ -14,7 +14,7 @@ setup(
         'opencv-python==4.3.0.36',
         'opencv-contrib-python==4.3.0.36',
         'jupyter==1.0.0',
-        'imutils-0.5.3'
+        'imutils==0.5.3'
     ]
 
 )
