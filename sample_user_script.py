@@ -40,3 +40,12 @@ def handler(tello, frame, fly_flag=False):
                 tello.move_down(UP_DOWN_HEIGHT)
 
         LOGGER.debug(f"User Handler Command: {last_command}")
+
+
+
+
+
+
+
+
+
