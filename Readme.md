@@ -388,7 +388,18 @@ After a few seconds you should see a window open up showing the video stream.  S
 
 In this last section we are going to cover a script that we will use in many of the advanced Tello programming courses.
 
-The script is, `tello_script_runner.py'
+The script is, `tello_script_runner.py`
+
+Before executing the `tello_script_runner.py` script, if you are on MacOS you must export a variable in the terminal window.
+
+The `tello_script_runner.py` script will create processes to execute capability such as viewing the video feed.  In a recent update to MacOS, Apple by default does not allow a Python program to fork additional processes.  This is a security feature to keep malicious programs from doing bad things, but it also keeps our program from doing good things!
+
+To inform MacOS that it is ok to allow us to run the `tello_script_runner.py`, in a terminal window type the following:
+
+```text
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+This will not impact your system and it is only valid for the terminal window you executed it in.
 
 
 
