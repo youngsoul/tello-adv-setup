@@ -316,7 +316,7 @@ def video_recorder(frame_queue, height=375, width=IMAGE_WIDTH):
 
     if video_writer is None:
         video_file = f"video_{datetime.now().strftime('%d-%m-%Y_%I-%M-%S_%p')}.mp4"
-        video_writer = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'mp4v'), 10, (width, height))
+        video_writer = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
 
     while True:
         frame = frame_queue.get()
