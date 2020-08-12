@@ -57,7 +57,7 @@ def signal_handler(sig, frame):
         except:
             pass
 
-    sys.exit()
+    sys.exit(-1)
 
 tello_image = None
 
