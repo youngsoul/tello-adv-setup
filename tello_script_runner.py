@@ -4,12 +4,13 @@ import signal
 import sys
 import time
 from datetime import datetime
-from multiprocessing import Manager, Process, Queue
 import argparse
 import importlib
 import logging
 from imutils.video import VideoStream
 import imutils
+import threading
+import queue
 
 FORMAT = '%(asctime)-15s %(levelname)-10s %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -17,6 +18,12 @@ LOGGER = logging.getLogger()
 
 tello = None
 video_writer = None
+local_video_stream = None
+
+# add a little delay to throttle the number of video frames
+# put into the video queue
+show_video_per_second = 0.2
+
 
 # This is hard coded because if the image gets too big then
 # the lag in the video stream gets very pronounced.  This is
@@ -31,19 +38,26 @@ def signal_handler(sig, frame):
     if tello:
         try:
             tello.streamoff()
-            tello.land()
+            if fly:
+                tello.land()
         except:
             pass
 
     if video_writer:
         try:
+            LOGGER.debug("**** RELEASE VIDEO WRITER")
             video_writer.release()
             video_writer = None
         except:
             pass
 
-    sys.exit()
+    if local_video_stream:
+        try:
+            local_video_stream.stop()
+        except:
+            pass
 
+    sys.exit()
 
 tello_image = None
 
@@ -65,7 +79,7 @@ battery_left = "??"
 last_command_timestamp = 0
 last_command = ""
 
-def _exception_save_process_keyboard_commands(tello, fly):
+def _exception_safe_process_keyboard_commands(tello, fly):
     try:
         return _process_keyboard_commands(tello, fly)
     except Exception as exc:
@@ -166,8 +180,6 @@ def _process_keyboard_commands(tello, fly):
     elif key == ord('l'):
         last_command = "Land"
         _display_text(cmd_tello_image, last_command, battery_left)
-        if fly:
-            tello.land()
         exit_flag = 0
 
     elif key == ord('x'):
@@ -177,41 +189,37 @@ def _process_keyboard_commands(tello, fly):
     return exit_flag
 
 
-local_video_stream = None
 
 
 def _get_video_frame(frame_read, vid_sim):
-    global local_video_stream
+    f = None
     try:
-        if vid_sim and local_video_stream is None:
-            local_video_stream = VideoStream(src=0).start()
-            time.sleep(2)
-
         if frame_read:
             f = frame_read.frame
-            f = imutils.resize(f, width=IMAGE_WIDTH)
-            return f
         elif vid_sim and local_video_stream:
             f = local_video_stream.read()
+
+        if f is not None:
             f = imutils.resize(f, width=IMAGE_WIDTH)
-            return f
 
     except Exception as exc:
         LOGGER.error("Exception getting video frame")
         LOGGER.error(f"{exc}")
 
-    return None
+    return f
 
 
-def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue, fly=False, tello_video_sim=False):
+def process_tello_video_feed(handler_file, video_queue, stop_event, video_event, fly=False, tello_video_sim=False):
     """
 
     :param exit_event: Multiprocessing Event.  When set, this event indicates that the process should stop.
     :type exit_event:
-    :param show_video_queue: Pipe to send video frames to the process that will show the video
-    :type show_video_queue: multiprocessing Pipe
-    :param video_writer_queue: Pipe to send video frames to the process that will save the video frames
-    :type video_writer_queue: multiprocessing Pipe
+    :param video_queue: Thread Queue to send the video frame to
+    :type video_queue: threading.Queue
+    :param stop_event: Thread Event to indicate if this thread function should stop
+    :type stop_event: threading.Event
+    :param video_event: threading.Event to indicate when the main loop is ready for video
+    :type video_event: threading.Event
     :param fly: Flag used to indicate whether the drone should fly.  False is useful when you just want see the video stream.
     :type fly: bool
     :param max_speed_limit: Maximum speed that the drone will send as a command.
@@ -219,14 +227,12 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
     :return: None
     :rtype:
     """
-    global tello
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
+    global tello, local_video_stream
+    last_show_video_queue_put_time = 0
     handler_method = None
 
     try:
-        if fly or ( not tello_video_sim and (show_video_queue or video_writer_queue)):
+        if fly or ( not tello_video_sim and video_queue):
             tello = Tello()
             rtn = tello.connect()
             LOGGER.debug(f"Connect Return: {rtn}")
@@ -240,30 +246,31 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
             init_method(tello, fly_flag=fly)
 
         frame_read = None
-        if tello and (show_video_queue or video_writer_queue):
+        if tello and video_queue:
             tello.streamon()
-            time.sleep(2)
             frame_read = tello.get_frame_read()
 
         if fly:
             tello.takeoff()
 
-        processing_flag = _exception_save_process_keyboard_commands(tello, fly)
-        while processing_flag != 0:
+        if tello_video_sim and local_video_stream is None:
+            local_video_stream = VideoStream(src=0).start()
+            time.sleep(2)
+
+        while not stop_event.isSet():
             frame = _get_video_frame(frame_read, tello_video_sim)
 
             if frame is None:
-                # print("Failed to read video frame")
-                if handler_method and processing_flag == 1:
+                LOGGER.debug("Failed to read video frame")
+                if handler_method:
                     handler_method(tello, frame, fly)
                 else:
                     # stop let keyboard commands take over
                     if fly:
                         tello.send_rc_control(0, 0, 0, 0)
-                processing_flag = _exception_save_process_keyboard_commands(tello, fly)
                 continue
 
-            if handler_method and processing_flag == 1:
+            if handler_method:
                 handler_method(tello, frame, fly)
             else:
                 # stop let keyboard commands take over
@@ -271,61 +278,27 @@ def process_tello_video_feed(handler_file, show_video_queue, video_writer_queue,
                     tello.send_rc_control(0, 0, 0, 0)
 
             # send frame to other processes
-            if show_video_queue:
-                show_video_queue.put(frame)
+            if video_queue and video_event.is_set():
+                try:
+                    if time.time() - last_show_video_queue_put_time > show_video_per_second:
+                        last_show_video_queue_put_time = time.time()
+                        video_queue.put_nowait(frame)
+                except:
+                    pass
 
-            if video_writer_queue:
-                video_writer_queue.put(frame)
 
-            processing_flag = _exception_save_process_keyboard_commands(tello, fly)
-            if processing_flag == 2:
-                # then stop processing the handler
-                # assume something is wrong in the handler code
-                handler_method = None
     except Exception as exc:
         LOGGER.error(f"Exiting Tello Process with exception: {exc}")
-
     finally:
-        # then we got the exit event so cleanup
-        signal_handler(None, "Tello Process")
+        # then the user has requested that we land and we should not process this thread
+        # any longer.
+        # to be safe... stop all movement
+        if fly:
+            tello.send_rc_control(0, 0, 0, 0)
 
+        stop_event.clear()
 
-def show_video(frame_queue):
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
-    LOGGER.debug("Start Show Video Process")
-
-    while True:
-        try:
-            frame = frame_queue.get()
-            # display the frame to the screen
-            cv2.imshow("Tello Video", frame)
-            cv2.waitKey(1)
-        except Exception as exc:
-            LOGGER.error(exc)
-
-
-def video_recorder(frame_queue, height=375, width=IMAGE_WIDTH):
-    global video_writer
-    # create a VideoWrite object, recoring to ./video.avi
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
-    LOGGER.debug("Start Video Recorder")
-
-    if video_writer is None:
-        video_file = f"video_{datetime.now().strftime('%d-%m-%Y_%I-%M-%S_%p')}.mp4"
-        video_writer = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
-
-    while True:
-        frame = frame_queue.get()
-        video_writer.write(frame)
-        # time.sleep(1 / 15)
-
-    # then we got the exit event so cleanup
-    signal_handler(None, "Video Writer")
-
+    LOGGER.info("Leaving User Script Processing Thread.....")
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
@@ -370,48 +343,66 @@ if __name__ == '__main__':
     if tello_video_sim:
         display_video = True
 
-    display_video_queue = None
-    if display_video:
-        display_video_queue = Queue()
+    # video queue to hold the frames from the Tello
+    video_queue = queue.Queue()
 
-    save_video_queue = None
-    if save_video:
-        save_video_queue = Queue()
 
-    with Manager() as manager:
-        p1 = Process(target=process_tello_video_feed,
-                     args=(handler_file, display_video_queue, save_video_queue, fly, tello_video_sim))
-
-        if display_video:
-            p2 = Process(target=show_video, args=(display_video_queue,))
-        else:
-            p2 = None
-
-        if save_video:
-            p3 = Process(target=video_recorder, args=(save_video_queue,))
-        else:
-            p3 = None
-
-        if p2:
-            p2.start()
-
-        if p3:
-            p3.start()
-
+    try:
+        stop_event = threading.Event()
+        ready_to_show_video_event = threading.Event()
+        p1 = threading.Thread(target=process_tello_video_feed,
+                     args=(handler_file, video_queue, stop_event, ready_to_show_video_event, fly, tello_video_sim,))
+        p1.setDaemon(True)
         p1.start()
 
-        p1.join()
-        if p2:
-            p2.terminate()
+        while True:
+            key_status = _exception_safe_process_keyboard_commands(tello, fly)
+            if key_status == 0:
+                stop_event.set()
+                ready_to_show_video_event.clear()
+                # wait up to 5 seconds for the handler thread to exit
+                # the handler thread will clear the stop_event when it
+                # exits
+                for _ in range(5):
+                    if stop_event.isSet():
+                        time.sleep(1)
+                    else:
+                        break
+                video_writer.release()
+                video_writer = None
+                break
 
-        if p3:
-            p3.terminate()
+            ready_to_show_video_event.set()
+            try:
+                frame = video_queue.get(block=False)
+            except:
+                frame = None
 
-        if p2:
-            p2.join()
 
-        if p3:
-            p3.join()
+            # check for video feed
+            if display_video and frame is not None:
+                try:
+                    # display the frame to the screen
+                    cv2.imshow("Tello Video", frame)
+                    cv2.waitKey(1)
+                except Exception as exc:
+                    LOGGER.error(f"Display Queue Error: {exc}")
 
-    cv2.destroyAllWindows()
-    LOGGER.info("Complete...")
+            # check for save video
+            if save_video and frame is not None:
+                if video_writer is None:
+                    (h, w) = frame.shape[:2]
+                    video_file = f"video_{datetime.now().strftime('%d-%m-%Y_%I-%M-%S_%p')}.mp4"
+                    video_writer = cv2.VideoWriter(video_file, cv2.VideoWriter_fourcc(*'mp4v'), 10, (w, h), True)
+
+                try:
+                    video_writer.write(frame)
+                except Exception as exc:
+                    LOGGER.error(f"Writing video error: {exc}")
+    finally:
+        LOGGER.debug("Complete...")
+
+        cv2.destroyWindow("Tello Video")
+        cv2.destroyWindow("Keyboard Cmds")
+        cv2.destroyAllWindows()
+        signal_handler(None, None)
