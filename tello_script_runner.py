@@ -20,6 +20,9 @@ tello = None
 video_writer = None
 local_video_stream = None
 
+# maximum number of
+MAX_VIDEO_Q_DEPTH = 10
+
 # add a little delay to throttle the number of video frames
 # put into the video queue
 show_video_per_second = 0.2
@@ -33,6 +36,15 @@ IMAGE_WIDTH = 500
 
 # function to handle keyboard interrupt
 def signal_handler(sig, frame):
+    global video_writer
+    print(f"Signal Handler: {frame}")
+
+    shutdown_gracefully()
+
+    sys.exit(-1)
+
+
+def shutdown_gracefully():
     global video_writer
     print(f"Signal Handler: {frame}")
     if tello:
@@ -57,7 +69,6 @@ def signal_handler(sig, frame):
         except:
             pass
 
-    sys.exit(-1)
 
 tello_image = None
 
@@ -252,6 +263,8 @@ def process_tello_video_feed(handler_file, video_queue, stop_event, video_event,
 
         if fly:
             tello.takeoff()
+            # send command to go no where
+            tello.send_rc_control(0, 0, 0, 0)
 
         if tello_video_sim and local_video_stream is None:
             local_video_stream = VideoStream(src=0).start()
@@ -264,18 +277,18 @@ def process_tello_video_feed(handler_file, video_queue, stop_event, video_event,
                 LOGGER.debug("Failed to read video frame")
                 if handler_method:
                     handler_method(tello, frame, fly)
-                else:
-                    # stop let keyboard commands take over
-                    if fly:
-                        tello.send_rc_control(0, 0, 0, 0)
+                # else:
+                #     # stop let keyboard commands take over
+                #     if fly:
+                #         tello.send_rc_control(0, 0, 0, 0)
                 continue
 
             if handler_method:
                 handler_method(tello, frame, fly)
-            else:
-                # stop let keyboard commands take over
-                if fly:
-                    tello.send_rc_control(0, 0, 0, 0)
+            # else:
+            #     # stop let keyboard commands take over
+            #     if fly:
+            #         tello.send_rc_control(0, 0, 0, 0)
 
             # send frame to other processes
             if video_queue and video_event.is_set():
@@ -344,7 +357,7 @@ if __name__ == '__main__':
         display_video = True
 
     # video queue to hold the frames from the Tello
-    video_queue = queue.Queue()
+    video_queue = queue.Queue(maxsize=MAX_VIDEO_Q_DEPTH)
 
 
     try:
@@ -368,12 +381,14 @@ if __name__ == '__main__':
                         time.sleep(1)
                     else:
                         break
-                video_writer.release()
-                video_writer = None
+                if video_writer:
+                    video_writer.release()
+                    video_writer = None
                 break
 
             ready_to_show_video_event.set()
             try:
+                print(f"Q sizse: {video_queue.qsize()}")
                 frame = video_queue.get(block=False)
             except:
                 frame = None
@@ -405,4 +420,4 @@ if __name__ == '__main__':
         cv2.destroyWindow("Tello Video")
         cv2.destroyWindow("Keyboard Cmds")
         cv2.destroyAllWindows()
-        signal_handler(None, None)
+        shutdown_gracefully()
