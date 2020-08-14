@@ -25,7 +25,7 @@ MAX_VIDEO_Q_DEPTH = 10
 
 # add a little delay to throttle the number of video frames
 # put into the video queue
-show_video_per_second = 0.2
+show_video_per_second = 0.3
 
 
 # This is hard coded because if the image gets too big then
