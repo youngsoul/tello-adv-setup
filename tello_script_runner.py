@@ -37,7 +37,6 @@ IMAGE_WIDTH = 500
 # function to handle keyboard interrupt
 def signal_handler(sig, frame):
     global video_writer
-    print(f"Signal Handler: {frame}")
 
     shutdown_gracefully()
 
@@ -46,7 +45,6 @@ def signal_handler(sig, frame):
 
 def shutdown_gracefully():
     global video_writer
-    print(f"Signal Handler: {frame}")
     if tello:
         try:
             tello.streamoff()
@@ -388,7 +386,7 @@ if __name__ == '__main__':
 
             ready_to_show_video_event.set()
             try:
-                print(f"Q sizse: {video_queue.qsize()}")
+                LOGGER.debug(f"Q size: {video_queue.qsize()}")
                 frame = video_queue.get(block=False)
             except:
                 frame = None
