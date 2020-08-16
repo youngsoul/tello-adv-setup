@@ -293,6 +293,7 @@ def process_tello_video_feed(handler_file, video_queue, stop_event, video_event,
                 try:
                     if time.time() - last_show_video_queue_put_time > show_video_per_second:
                         last_show_video_queue_put_time = time.time()
+                        LOGGER.debug("Put video frame")
                         video_queue.put_nowait(frame)
                 except:
                     pass
@@ -359,6 +360,8 @@ if __name__ == '__main__':
 
 
     try:
+        cv2.namedWindow("Tello Video")
+
         stop_event = threading.Event()
         ready_to_show_video_event = threading.Event()
         p1 = threading.Thread(target=process_tello_video_feed,
