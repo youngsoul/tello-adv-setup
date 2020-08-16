@@ -192,7 +192,8 @@ def _process_keyboard_commands(tello, fly):
         exit_flag = 0
 
     elif key == ord('x'):
-        exit_flag = 2  # stop processing the handler function but continue to fly and see video
+        tello.emergency()
+        exit_flag = 0  # stop processing the handler function but continue to fly and see video
 
     # LOGGER.debug(f"Exit Flag: {exit_flag}")
     return exit_flag
